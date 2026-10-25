@@ -1,0 +1,196 @@
+@model Interview.Web.Models.ProductCatalogViewModel
+@{
+    ViewData["Title"] = "Product Catalog";
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+}
+
+<div class="catalog-shell">
+    <div class="mb-4">
+        <p class="text-uppercase text-muted fw-semibold letter-spacing">Inventory</p>
+        <h1 class="display-6 fw-bold mb-2">Product catalog</h1>
+        <p class="text-muted mb-0">Search and filter the product list by category to find the right items quickly.</p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-warning" role="alert">
+            <div asp-validation-summary="All" class="mb-0"></div>
+        </div>
+    }
+
+    <form method="get" asp-action="Products" class="search-panel">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-4">
+                <label asp-for="SearchTerm" class="form-label">Search products</label>
+                <input asp-for="SearchTerm" class="form-control" placeholder="Search by name or SKU" value="@Model.SearchTerm" />
+            </div>
+
+            <div class="col-lg-3">
+                <label for="category" class="form-label">Category</label>
+                <select id="category" name="category" class="form-select">
+                    <option value="">All categories</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        if (category.Name == Model.SelectedCategoryName)
+                        {
+                            <option value="@category.Name" selected>@category.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@category.Name">@category.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-lg-3">
+                <label for="sortBy" class="form-label">Sort by</label>
+                <select id="sortBy" name="sortBy" class="form-select">
+                    <option value="name-asc" selected="@(Model.SortBy == "name-asc")">Name (A-Z)</option>
+                    <option value="name-desc" selected="@(Model.SortBy == "name-desc")">Name (Z-A)</option>
+                    <option value="sku-asc" selected="@(Model.SortBy == "sku-asc")">SKU (A-Z)</option>
+                    <option value="sku-desc" selected="@(Model.SortBy == "sku-desc")">SKU (Z-A)</option>
+                    <option value="category-asc" selected="@(Model.SortBy == "category-asc")">Category (A-Z)</option>
+                    <option value="category-desc" selected="@(Model.SortBy == "category-desc")">Category (Z-A)</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2">
+                <label for="pageSize" class="form-label">Items per page</label>
+                <select id="pageSize" name="pageSize" class="form-select">
+                    <option value="5" selected="@(Model.PageSize == 5)">5</option>
+                    <option value="10" selected="@(Model.PageSize == 10)">10</option>
+                    <option value="15" selected="@(Model.PageSize == 15)">15</option>
+                </select>
+            </div>
+
+            <div class="col-lg-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="includeInactive" name="includeInactive" value="true" @(Model.IncludeInactive ? "checked" : null) />
+                    <label class="form-check-label" for="includeInactive">
+                        Include inactive items
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">Apply filters</button>
+            <a asp-action="Products" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </form>
+
+    <section id="categories" class="mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 mb-0">Browse categories</h2>
+            <span class="text-muted">@Model.TotalCount results found</span>
+        </div>
+
+        <div class="category-grid">
+            <a asp-action="Products" asp-route-search="@Model.SearchTerm" asp-route-includeInactive="@Model.IncludeInactive" asp-route-sortBy="@Model.SortBy" asp-route-pageSize="@Model.PageSize"
+               class="category-card @(Model.SelectedCategoryId is null ? "active" : "")">
+                <span class="category-name">All products</span>
+                <span class="category-count">@Model.Products.Count</span>
+            </a>
+
+            @foreach (var category in Model.Categories)
+            {
+                <a asp-action="Products"
+                   asp-route-category="@category.Name"
+                   asp-route-search="@Model.SearchTerm"
+                   asp-route-includeInactive="@Model.IncludeInactive"
+                   asp-route-sortBy="@Model.SortBy"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="category-card @(category.CategoryId == Model.SelectedCategoryId ? "active" : "")">
+                    <span class="category-name">@category.Name</span>
+                    <span class="category-count">@category.ProductCount</span>
+                </a>
+            }
+        </div>
+    </section>
+
+    <section class="mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 mb-0">Products</h2>
+            <span class="badge bg-light text-dark border">@Model.TotalCount items</span>
+        </div>
+
+        @if (Model.Products.Any())
+        {
+            <div class="row g-3">
+                @foreach (var product in Model.Products)
+                {
+                    <div class="col-md-6 col-xl-4">
+                        <a class="product-card-link" asp-action="Product" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl">
+                            <article class="product-card h-100">
+                                <div class="product-image-placeholder mb-3" role="img" aria-label="Product image placeholder">
+                                    <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                                        <rect x="7" y="9" width="34" height="30" rx="4"></rect>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <path d="M10 34l10-10 6 6 5-5 7 9"></path>
+                                    </svg>
+                                    <span>Product image</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="badge @(product.IsActive ? "bg-success" : "bg-secondary")">
+                                        @(product.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                    <small class="text-muted">@product.Sku</small>
+                                </div>
+
+                                <h3 class="h5 mb-2">@product.Name</h3>
+                                <p class="mb-2 text-muted">Category</p>
+                                <div class="product-meta">@product.CategoryName</div>
+                                <span class="d-inline-block mt-3 text-primary fw-semibold">View details</span>
+                            </article>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <h3 class="h5">No products match your filters</h3>
+                <p class="mb-0">Try a different search term or clear the selected category to see the full catalog.</p>
+            </div>
+        }
+    </section>
+
+    @if (Model.TotalPages > 1)
+    {
+        var firstItem = (Model.Page - 1) * Model.PageSize + 1;
+        var lastItem = Math.Min(Model.Page * Model.PageSize, Model.TotalCount);
+        <nav class="mt-4" aria-label="Product pages">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <span class="text-muted">Showing @firstItem–@lastItem of @Model.TotalCount products</span>
+                <ul class="pagination mb-0">
+                    <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                        <a class="page-link catalog-navigation" asp-action="Products"
+                           asp-route-search="@Model.SearchTerm" asp-route-category="@Model.SelectedCategoryName"
+                           asp-route-includeInactive="@Model.IncludeInactive" asp-route-sortBy="@Model.SortBy"
+                           asp-route-pageSize="@Model.PageSize" asp-route-page="@(Model.Page - 1)"
+                           aria-label="Previous page">Previous</a>
+                    </li>
+                    @for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+                    {
+                        <li class="page-item @(pageNumber == Model.Page ? "active" : "")">
+                            <a class="page-link catalog-navigation" asp-action="Products"
+                               asp-route-search="@Model.SearchTerm" asp-route-category="@Model.SelectedCategoryName"
+                               asp-route-includeInactive="@Model.IncludeInactive" asp-route-sortBy="@Model.SortBy"
+                               asp-route-pageSize="@Model.PageSize" asp-route-page="@pageNumber"
+                               aria-current="@(pageNumber == Model.Page ? "page" : null)">@pageNumber</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link catalog-navigation" asp-action="Products"
+                           asp-route-search="@Model.SearchTerm" asp-route-category="@Model.SelectedCategoryName"
+                           asp-route-includeInactive="@Model.IncludeInactive" asp-route-sortBy="@Model.SortBy"
+                           asp-route-pageSize="@Model.PageSize" asp-route-page="@(Model.Page + 1)"
+                           aria-label="Next page">Next</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    }
+</div>

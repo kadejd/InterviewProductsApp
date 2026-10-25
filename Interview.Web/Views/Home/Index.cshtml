@@ -1,8 +1,33 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="home-shell">
+    <section class="home-hero mb-4">
+        <p class="text-uppercase fw-semibold letter-spacing mb-3">Interview.Web</p>
+        <h1 class="display-4 fw-bold mb-3">Welcome to your product catalog</h1>
+        <p class="lead mb-4">Find the products you need, browse by category, and quickly search the inventory.</p>
+        <a asp-controller="Home" asp-action="Products" class="btn btn-light btn-lg">Browse products</a>
+    </section>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <section class="home-feature">
+                <h2 class="h5">Browse by category</h2>
+                <p class="text-muted mb-0">Explore products grouped into easy-to-browse categories.</p>
+            </section>
+        </div>
+        <div class="col-md-4">
+            <section class="home-feature">
+                <h2 class="h5">Find products fast</h2>
+                <p class="text-muted mb-0">Search the catalog by product name or SKU.</p>
+            </section>
+        </div>
+        <div class="col-md-4">
+            <section class="home-feature">
+                <h2 class="h5">Customize your view</h2>
+                <p class="text-muted mb-0">Sort the catalog and choose whether to include inactive items.</p>
+            </section>
+        </div>
+    </div>
 </div>
