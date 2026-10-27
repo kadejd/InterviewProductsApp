@@ -10,24 +10,24 @@ async function updateCatalog(url, addHistoryEntry) {
     categoryRequest = new AbortController();
 
     try {
-        const response = await fetch(url, { signal: categoryRequest.signal });
-        if (!response.ok) {
-            throw new Error(`Category request failed with status ${response.status}.`);
-        }
+            const response = await fetch(url, { signal: categoryRequest.signal });
+            if (!response.ok) {
+                throw new Error(`Category request failed with status ${response.status}.`);
+            }
 
-        const page = new DOMParser().parseFromString(await response.text(), "text/html");
-        const catalog = document.querySelector(".catalog-shell");
-        const updatedCatalog = page.querySelector(".catalog-shell");
-        if (!catalog || !updatedCatalog) {
-            throw new Error("The category response did not contain the product catalog.");
-        }
+            const page = new DOMParser().parseFromString(await response.text(), "text/html");
+            const catalog = document.querySelector(".catalog-shell");
+            const updatedCatalog = page.querySelector(".catalog-shell");
+            if (!catalog || !updatedCatalog) {
+                throw new Error("The category response did not contain the product catalog.");
+            }
 
-        catalog.replaceWith(updatedCatalog);
-        document.title = page.title;
-        if (addHistoryEntry) {
-            window.history.pushState({}, "", url);
-        }
-    } catch (error) {
+            catalog.replaceWith(updatedCatalog);
+            document.title = page.title;
+            if (addHistoryEntry) {
+                window.history.pushState({}, "", url);
+            }
+        } catch (error) {
         if (error.name === "AbortError") {
             return;
         }
@@ -46,10 +46,6 @@ document.addEventListener("click", (event) => {
     if (
         !link ||
         event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey ||
         link.closest(".page-item.disabled") ||
         link.target ||
         link.hasAttribute("download") ||
